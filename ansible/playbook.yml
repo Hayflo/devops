@@ -1,0 +1,404 @@
+---
+- name: Déploiement serveur web avec application métier (calculatrice)
+  hosts: SRVWEB
+  become: yes
+  tasks:
+    - name: Mettre à jour les paquets
+      apt:
+        update_cache: yes
+
+    - name: Installer nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: S'assurer que nginx est démarré
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Créer le dossier web si absent
+      file:
+        path: /var/www/html
+        state: directory
+        mode: '0755'
+
+    - name: Déployer la page d'accueil avec bouton vers la calculatrice
+      copy:
+        dest: /var/www/html/index.html
+        content: |
+          <!DOCTYPE html>
+          <html lang="fr">
+          <head>
+              <meta charset="UTF-8">
+              <title>Application Métier</title>
+              <style>
+                  body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+                  h1 { color: #2c3e50; }
+                  button {
+                      background-color: #3498db;
+                      color: white;
+                      border: none;
+                      padding: 10px 20px;
+                      font-size: 16px;
+                      cursor: pointer;
+                      border-radius: 5px;
+                  }
+                  button:hover { background-color: #2980b9; }
+              </style>
+          </head>
+          <body>
+              <h1>Bienvenue sur l'application métier</h1>
+              <p>Cliquez ci-dessous pour accéder à la calculatrice :</p>
+              <button onclick="window.location.href='calculatrice.html'">Ouvrir la calculatrice</button>
+          </body>
+          </html>
+
+    - name: Déployer l'application calculatrice
+      copy:
+        dest: /var/www/html/calculatrice.html
+        content: |
+          <!DOCTYPE html>
+          <html lang="fr">
+          <head>
+              <meta charset="UTF-8">
+              <title>Calculatrice</title>
+              <style>
+                  body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+                  .calculatrice {
+                      display: inline-block;
+                      border: 2px solid #3498db;
+                      padding: 20px;
+                      border-radius: 10px;
+                      background-color: #f9f9f9;
+                  }
+                  input[type="text"] {
+                      width: 200px;
+                      padding: 10px;
+                      font-size: 18px;
+                      margin-bottom: 10px;
+                      text-align: right;
+                  }
+                  button {
+                      width: 50px;
+                      height: 50px;
+                      font-size: 18px;
+                      margin: 2px;
+                      cursor: pointer;
+                      background-color: #e0e0e0;
+                      border: 1px solid #ccc;
+                      border-radius: 5px;
+                  }
+                  button:hover { background-color: #d0d0d0; }
+                  .operator { background-color: #3498db; color: white; }
+                  .operator:hover { background-color: #2980b9; }
+              </style>
+          </head>
+          <body>
+              <div class="calculatrice">
+                  <h2>Calculatrice</h2>
+                  <input type="text" id="resultat" readonly>
+                  <br>
+                  <button onclick="ajouterChiffre('7')">7</button>
+                  <button onclick="ajouterChiffre('8')">8</button>
+                  <button onclick="ajouterChiffre('9')">9</button>
+                  <button class="operator" onclick="ajouterOperateur('/')">/</button>
+                  <br>
+                  <button onclick="ajouterChiffre('4')">4</button>
+                  <button onclick="ajouterChiffre('5')">5</button>
+                  <button onclick="ajouterChiffre('6')">6</button>
+                  <button class="operator" onclick="ajouterOperateur('*')">*</button>
+                  <br>
+                  <button onclick="ajouterChiffre('1')">1</button>
+                  <button onclick="ajouterChiffre('2')">2</button>
+                  <button onclick="ajouterChiffre('3')">3</button>
+                  <button class="operator" onclick="ajouterOperateur('-')">-</button>
+                  <br>
+                  <button onclick="ajouterChiffre('0')">0</button>
+                  <button onclick="ajouterChiffre('.')">.</button>
+                  <button onclick="calculer()">=</button>
+                  <button class="operator" onclick="ajouterOperateur('+')">+</button>
+                  <br>
+                  <button onclick="effacer()">C</button>
+              </div>
+
+              <script>
+                  function ajouterChiffre(chiffre) {
+                      document.getElementById('resultat').value += chiffre;
+                  }
+
+                  function ajouterOperateur(operateur) {
+                      document.getElementById('resultat').value += operateur;
+                  }
+
+                  function calculer() {
+                      try {
+                          document.getElementById('resultat').value = eval(document.getElementById('resultat').value);
+                      } catch (e) {
+                          document.getElementById('resultat').value = "Erreur";
+                      }
+                  }
+
+                  function effacer() {
+                      document.getElementById('resultat').value = "";
+                  }
+              </script>
+          </body>
+          </html>
+
+---
+- name: Déploiement base de données
+  hosts: SRVDATA
+  become: yes
+  tasks:
+    - name: Mettre à jour les paquets
+      apt:
+        update_cache: yes
+
+    - name: Installer MariaDB
+      apt:
+        name: mariadb-server
+        state: present
+
+    - name: S'assurer que MariaDB est démarré
+      service:
+        name: mariadb
+        state: started
+        enabled: yes
+
+#----------------------------------------------------------------------------------------------------------------------------------
+#---
+# - name: Déploiement serveur web avec application métier (calculatrice)
+#   hosts: SRVW  # Groupe pour SRV-Web1 et SRV-Web2
+#   become: yes
+#   tasks:
+#     - name: Mettre à jour les paquets
+#       apt:
+#         update_cache: yes
+#
+#     - name: Installer nginx
+#       apt:
+#         name: nginx
+#         state: present
+#
+#     - name: S'assurer que nginx est démarré
+#       service:
+#         name: nginx
+#         state: started
+#         enabled: yes
+#
+#     - name: Créer le dossier web si absent
+#       file:
+#         path: /var/www/html
+#         state: directory
+#         mode: '0755'
+#
+#     - name: Déployer la page d'accueil avec bouton vers la calculatrice
+#       copy:
+#         dest: /var/www/html/index.html
+#         content: |
+#           <!DOCTYPE html>
+#           <html lang="fr">
+#           <head>
+#               <meta charset="UTF-8">
+#               <title>Application Métier</title>
+#               <style>
+#                   body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+#                   h1 { color: #2c3e50; }
+#                   button {
+#                       background-color: #3498db;
+#                       color: white;
+#                       border: none;
+#                       padding: 10px 20px;
+#                       font-size: 16px;
+#                       cursor: pointer;
+#                       border-radius: 5px;
+#                   }
+#                   button:hover { background-color: #2980b9; }
+#               </style>
+#           </head>
+#           <body>
+#               <h1>Bienvenue sur l'application métier</h1>
+#               <p>Cliquez ci-dessous pour accéder à la calculatrice :</p>
+#               <button onclick="window.location.href='calculatrice.html'">Ouvrir la calculatrice</button>
+#           </body>
+#           </html>
+#
+#     - name: Déployer l'application calculatrice
+#       copy:
+#         dest: /var/www/html/calculatrice.html
+#         content: |
+#           <!DOCTYPE html>
+#           <html lang="fr">
+#           <head>
+#               <meta charset="UTF-8">
+#               <title>Calculatrice</title>
+#               <style>
+#                   body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+#                   .calculatrice {
+#                       display: inline-block;
+#                       border: 2px solid #3498db;
+#                       padding: 20px;
+#                       border-radius: 10px;
+#                       background-color: #f9f9f9;
+#                   }
+#                   input[type="text"] {
+#                       width: 200px;
+#                       padding: 10px;
+#                       font-size: 18px;
+#                       margin-bottom: 10px;
+#                       text-align: right;
+#                   }
+#                   button {
+#                       width: 50px;
+#                       height: 50px;
+#                       font-size: 18px;
+#                       margin: 2px;
+#                       cursor: pointer;
+#                       background-color: #e0e0e0;
+#                       border: 1px solid #ccc;
+#                       border-radius: 5px;
+#                   }
+#                   button:hover { background-color: #d0d0d0; }
+#                   .operator { background-color: #3498db; color: white; }
+#                   .operator:hover { background-color: #2980b9; }
+#               </style>
+#           </head>
+#           <body>
+#               <div class="calculatrice">
+#                   <h2>Calculatrice</h2>
+#                   <input type="text" id="resultat" readonly>
+#                   <br>
+#                   <button onclick="ajouterChiffre('7')">7</button>
+#                   <button onclick="ajouterChiffre('8')">8</button>
+#                   <button onclick="ajouterChiffre('9')">9</button>
+#                   <button class="operator" onclick="ajouterOperateur('/')">/</button>
+#                   <br>
+#                   <button onclick="ajouterChiffre('4')">4</button>
+#                   <button onclick="ajouterChiffre('5')">5</button>
+#                   <button onclick="ajouterChiffre('6')">6</button>
+#                   <button class="operator" onclick="ajouterOperateur('*')">*</button>
+#                   <br>
+#                   <button onclick="ajouterChiffre('1')">1</button>
+#                   <button onclick="ajouterChiffre('2')">2</button>
+#                   <button onclick="ajouterChiffre('3')">3</button>
+#                   <button class="operator" onclick="ajouterOperateur('-')">-</button>
+#                   <br>
+#                   <button onclick="ajouterChiffre('0')">0</button>
+#                   <button onclick="ajouterChiffre('.')">.</button>
+#                   <button onclick="calculer()">=</button>
+#                   <button class="operator" onclick="ajouterOperateur('+')">+</button>
+#                   <br>
+#                   <button onclick="effacer()">C</button>
+#               </div>
+#
+#               <script>
+#                   function ajouterChiffre(chiffre) {
+#                       document.getElementById('resultat').value += chiffre;
+#                   }
+#
+#                   function ajouterOperateur(operateur) {
+#                       document.getElementById('resultat').value += operateur;
+#                   }
+#
+#                   function calculer() {
+#                       try {
+#                           document.getElementById('resultat').value = eval(document.getElementById('resultat').value);
+#                       } catch (e) {
+#                           document.getElementById('resultat').value = "Erreur";
+#                       }
+#                   }
+#
+#                   function effacer() {
+#                       document.getElementById('resultat').value = "";
+#                   }
+#               </script>
+#           </body>
+#           </html>
+#
+# ---
+# - name: Déploiement base de données MariaDB
+#   hosts: SRVDAT  # Groupe pour SRV-Maria-db
+#   become: yes
+#   tasks:
+#     - name: Mettre à jour les paquets
+#       apt:
+#         update_cache: yes
+#
+#     - name: Installer MariaDB
+#       apt:
+#         name: mariadb-server
+#         state: present
+#
+#     - name: S'assurer que MariaDB est démarré
+#       service:
+#         name: mariadb
+#         state: started
+#         enabled: yes
+#
+# ---
+# - name: Déploiement de Graylog (pour la centralisation des logs)
+#   hosts: SRVLOG  # Groupe pour SRV-Graylog (192.168.10.5)
+#   become: yes
+#   tasks:
+#     - name: Installer les dépendances (OpenJDK, Elasticsearch, MongoDB)
+#       apt:
+#         name: ["openjdk-11-jre", "elasticsearch", "mongodb"]
+#         state: present
+#         update_cache: yes
+#
+#     - name: Configurer Elasticsearch pour Graylog
+#       copy:
+#         dest: /etc/elasticsearch/elasticsearch.yml
+#         content: |
+#           cluster.name: graylog
+#           network.host: 127.0.0.1
+#       notify: Redémarrer Elasticsearch
+#
+#     - name: Démarrer et activer Elasticsearch
+#       service:
+#         name: elasticsearch
+#         state: started
+#         enabled: yes
+#
+#     - name: Démarrer et activer MongoDB
+#       service:
+#         name: mongod
+#         state: started
+#         enabled: yes
+#
+#     - name: Ajouter le dépôt Graylog
+#       apt_repository:
+#         repo: "deb https://packages.graylog2.org/repo/debian stable main"
+#         state: present
+#         filename: graylog
+#
+#     - name: Installer Graylog
+#       apt:
+#         name: graylog-server
+#         state: present
+#         update_cache: yes
+#
+#     - name: Configurer Graylog
+#       template:
+#         src: graylog.conf.j2  # (À créer si tu veux personnaliser la configuration)
+#         dest: /etc/graylog/server/server.conf
+#       notify: Redémarrer Graylog
+#
+#     - name: Démarrer et activer Graylog
+#       service:
+#         name: graylog-server
+#         state: started
+#         enabled: yes
+#
+#   handlers:
+#     - name: Redémarrer Elasticsearch
+#       service:
+#         name: elasticsearch
+#         state: restarted
+#
+#     - name: Redémarrer Graylog
+#       service:
+#         name: graylog-server
+#         state: restarted

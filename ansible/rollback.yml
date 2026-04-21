@@ -1,0 +1,187 @@
+---
+- name: Rollback serveur web (SRVWEB)
+  hosts: SRVWEB
+  become: yes
+  tasks:
+    - name: Mettre à jour les paquets
+      apt:
+        update_cache: yes
+
+    - name: Installer nginx si absent
+      apt:
+        name: nginx
+        state: present
+
+    - name: Créer le dossier web si absent
+      file:
+        path: /var/www/html
+        state: directory
+        mode: '0755'
+
+    - name: Restaurer la page index.html par défaut (sans supprimer calculatrice.html)
+      copy:
+        dest: /var/www/html/index.html
+        content: |
+          <!DOCTYPE html>
+          <html lang="fr">
+          <head>
+              <meta charset="UTF-8">
+              <title>Rollback effectué</title>
+              <style>
+                  body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+                  h1 { color: #e74c3c; }
+              </style>
+          </head>
+          <body>
+              <h1>Rollback effectué : Page par défaut restaurée</h1>
+              <p>La calculatrice est toujours accessible <a href="calculatrice.html">ici</a>.</p>
+          </body>
+          </html>
+
+    - name: S'assurer que nginx est démarré
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+---
+- name: Rollback base de données (SRVDATA)
+  hosts: SRVDATA
+  become: yes
+  tasks:
+    - name: Mettre à jour les paquets
+      apt:
+        update_cache: yes
+
+    - name: Installer MariaDB si absent
+      apt:
+        name: mariadb-server
+        state: present
+
+    - name: S'assurer que MariaDB est démarré
+      service:
+        name: mariadb
+        state: started
+        enabled: yes
+
+#---------------------------------------
+# - name: Rollback complet du déploiement (rétablit l'état initial)
+#   hosts: SRVW:SRVDAT:SRVLOG  # Applique à tous les groupes
+#   become: yes
+#   tasks:
+#     - name: Arrêter tous les services concernés
+#       service:
+#         name: "{{ item }}"
+#         state: stopped
+#       loop:
+#         - nginx
+#         - mariadb
+#         - graylog-server
+#         - elasticsearch
+#         - mongod
+#       ignore_errors: yes  # Ignore si un service n'est pas installé
+#
+# ---
+# - name: Rollback serveur web (SRVW)
+#   hosts: SRVW
+#   become: yes
+#   tasks:
+#     - name: Désinstaller nginx
+#       apt:
+#         name: nginx
+#         state: absent
+#         purge: yes
+#         autoclean: yes
+#
+#     - name: Supprimer le dossier /var/www/html
+#       file:
+#         path: /var/www/html
+#         state: absent
+#
+#     - name: Réinstaller nginx (proprement)
+#       apt:
+#         name: nginx
+#         state: present
+#         update_cache: yes
+#
+#     - name: Créer le dossier web par défaut
+#       file:
+#         path: /var/www/html
+#         state: directory
+#         mode: '0755'
+#
+#     - name: Restaurer la page index.html par défaut (version minimaliste)
+#       copy:
+#         dest: /var/www/html/index.html
+#         content: "<h1>Serveur web réinitialisé</h1><p>Prêt pour un nouveau déploiement.</p>"
+#
+#     - name: Démarrer nginx
+#       service:
+#         name: nginx
+#         state: started
+#         enabled: yes
+#
+# ---
+# - name: Rollback base de données (SRVDATA)
+#   hosts: SRVDATA
+#   become: yes
+#   tasks:
+#     - name: Désinstaller MariaDB
+#       apt:
+#         name: mariadb-server
+#         state: absent
+#         purge: yes
+#         autoclean: yes
+#
+#     - name: Réinstaller MariaDB (proprement)
+#       apt:
+#         name: mariadb-server
+#         state: present
+#         update_cache: yes
+#
+#     - name: Démarrer MariaDB
+#       service:
+#         name: mariadb
+#         state: started
+#         enabled: yes
+#
+# ---
+# - name: Rollback Graylog (SRVLOG)
+#   hosts: SRVLOG
+#   become: yes
+#   tasks:
+#     - name: Désinstaller Graylog et ses dépendances
+#       apt:
+#         name: "{{ item }}"
+#         state: absent
+#         purge: yes
+#       loop:
+#         - graylog-server
+#         - elasticsearch
+#         - mongodb
+#
+#     - name: Supprimer les fichiers de configuration résiduels
+#       file:
+#         path: "{{ item }}"
+#         state: absent
+#       loop:
+#         - /etc/graylog
+#         - /etc/elasticsearch
+#         - /var/lib/elasticsearch
+#         - /var/lib/mongodb
+#
+#     - name: Réinstaller les dépendances (optionnel, pour une réinstallation future)
+#       apt:
+#         name: ["openjdk-11-jre", "elasticsearch", "mongodb"]
+#         state: present
+#         update_cache: yes
+#
+#     - name: Démarrer Elasticsearch et MongoDB (si réinstallés)
+#       service:
+#         name: "{{ item }}"
+#         state: started
+#         enabled: yes
+#       loop:
+#         - elasticsearch
+#         - mongod
+#       ignore_errors: yes  # Au cas où les services ne sont pas réinstallés
