@@ -50,7 +50,7 @@
           </head>
           <body>
               <h1>Bienvenue sur l'application métier</h1>
-              <p>Cliquez ci-dessous pour accéder à la calculatrice</br><p>test</p> :</p>
+              <p>Cliquez ci-dessous pour accéder à la calculatrice:</p>
               <button onclick="window.location.href='calculatrice.html'">Ouvrir la calculatrice</button>
           </body>
           </html>
@@ -166,6 +166,7 @@
         state: started
         enabled: yes
 
+- name: déploiement de graylog
 #----------------------------------------------------------------------------------------------------------------------------------
 #---
 # - name: Déploiement serveur web avec application métier (calculatrice)
