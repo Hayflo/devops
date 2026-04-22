@@ -44,7 +44,6 @@
         state: started
         enabled: yes
 
----
 - name: Rollback base de données (SRVDATA)
   hosts: SRVDATA
   become: yes
@@ -66,7 +65,7 @@
 
 #---------------------------------------
 # - name: Rollback complet du déploiement (rétablit l'état initial)
-#   hosts: SRVW:SRVDAT:SRVLOG  # Applique à tous les groupes
+#   hosts: SRVW:SRVDAT:SRVLOG
 #   become: yes
 #   tasks:
 #     - name: Arrêter tous les services concernés
@@ -79,9 +78,8 @@
 #         - graylog-server
 #         - elasticsearch
 #         - mongod
-#       ignore_errors: yes  # Ignore si un service n'est pas installé
+#       ignore_errors: yes
 #
-# ---
 # - name: Rollback serveur web (SRVW)
 #   hosts: SRVW
 #   become: yes
@@ -121,7 +119,6 @@
 #         state: started
 #         enabled: yes
 #
-# ---
 # - name: Rollback base de données (SRVDATA)
 #   hosts: SRVDATA
 #   become: yes
@@ -145,7 +142,6 @@
 #         state: started
 #         enabled: yes
 #
-# ---
 # - name: Rollback Graylog (SRVLOG)
 #   hosts: SRVLOG
 #   become: yes
@@ -170,7 +166,7 @@
 #         - /var/lib/elasticsearch
 #         - /var/lib/mongodb
 #
-#     - name: Réinstaller les dépendances (optionnel, pour une réinstallation future)
+#     - name: Réinstaller les dépendances (optionnel)
 #       apt:
 #         name: ["openjdk-11-jre", "elasticsearch", "mongodb"]
 #         state: present
@@ -184,4 +180,4 @@
 #       loop:
 #         - elasticsearch
 #         - mongod
-#       ignore_errors: yes  # Au cas où les services ne sont pas réinstallés
+#       ignore_errors: yes
