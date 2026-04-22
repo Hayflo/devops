@@ -166,7 +166,6 @@
         state: started
         enabled: yes
 
-- name: déploiement de graylog
 #----------------------------------------------------------------------------------------------------------------------------------
 #---
 # - name: Déploiement serveur web avec application métier (calculatrice)
