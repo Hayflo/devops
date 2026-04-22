@@ -147,7 +147,6 @@
           </body>
           </html>
 
----
 - name: Déploiement base de données
   hosts: SRVDATA
   become: yes
