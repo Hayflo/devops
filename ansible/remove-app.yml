@@ -1,0 +1,36 @@
+---
+- name: Retirer l'application calculatrice
+  hosts: SRVWEB
+  become: yes
+  tasks:
+
+    - name: Supprimer la calculatrice
+      file:
+        path: /var/www/html/calculatrice.html
+        state: absent
+
+    - name: Remettre une page d'accueil neutre
+      copy:
+        dest: /var/www/html/index.html
+        content: |
+          <!DOCTYPE html>
+          <html lang="fr">
+          <head>
+              <meta charset="UTF-8">
+              <title>Serveur web</title>
+              <style>
+                  body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+                  h1 { color: #2c3e50; }
+              </style>
+          </head>
+          <body>
+              <h1>Serveur en ligne</h1>
+              <p>Aucune application déployée pour le moment.</p>
+          </body>
+          </html>
+
+    - name: S'assurer que nginx tourne toujours
+      service:
+        name: nginx
+        state: started
+        enabled: yes
