@@ -1,10 +1,10 @@
 # Groupe des serveurs web Nginx # En local
 [SRVWEB]
-192.168.2.134 ansible_user=hayflo ansible_ssh_private_key_file=/var/lib/jenkins/.ssh/id_ed25519
+100.95.221.197 ansible_user=hayflo ansible_ssh_private_key_file=/var/lib/jenkins/.ssh/id_ed25519
 
 # Groupe des serveurs de base de données mariadb # En local
 [SRVDATA]
-192.168.2.135 ansible_user=hayflo ansible_ssh_private_key_file=/var/lib/jenkins/.ssh/id_ed25519
+100.95.95.30 ansible_user=hayflo ansible_ssh_private_key_file=/var/lib/jenkins/.ssh/id_ed25519
 
 # Groupe des serveurs web (commenté)
 #[SRVW]
