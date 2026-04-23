@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         ANSIBLE_HOST_KEY_CHECKING = 'False'
-        SRVWEB = '192.168.2.134'
-        SRVDATA = '192.168.2.135'
+        SRVWEB = '100.95.221.197'
+        SRVDATA = '100.95.95.30'
         WEB_SERVER = "$SRVWEB"  // Variable pour les vérifications curl
         INVENTORY = 'ansible/hosts'
         PLAYBOOK = 'ansible/playbook.yml'
